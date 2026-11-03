@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: mastertech-api
+    env: docker
+    plan: free
+    region: oregon
+    envVars:
+      - key: SERVER_PORT
+        value: "8089"
+      # Define en el panel de Render (sync: false = no se guarda en el repo):
+      - key: JWT_SECRET
+        sync: false
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
