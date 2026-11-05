@@ -16,6 +16,4 @@ public class PerfilUpdateRequest {
 
     @Pattern(regexp = "\\d{9}", message = "El teléfono debe tener 9 dígitos")
     private String numeroTelefono;
-
-    private String biografia;
 }

@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -51,9 +50,4 @@ public class Usuario {
     @Pattern(regexp = "\\d{9}", message = "El teléfono debe tener 9 dígitos")
     @Column(name = "numero_telefono", length = 9, unique = true)
     private String numeroTelefono;
-
-    // RELACIÓN @OneToOne
-    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @ToString.Exclude // Evita bucles infinitos al imprimir el objeto
-    private Perfil perfil;
 }

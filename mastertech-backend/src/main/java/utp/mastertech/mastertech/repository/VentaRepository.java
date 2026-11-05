@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface VentaRepository extends JpaRepository<Venta, Long> {
 
 
-    // Para el historial de compras del perfil (más reciente primero)
+    // Para el historial de compras del usuario (más reciente primero)
     List<Venta> findByUsuarioOrderByFechaDesc(Usuario usuario);
 
     Optional<Venta> findByNumeroOrden(String numeroOrden);

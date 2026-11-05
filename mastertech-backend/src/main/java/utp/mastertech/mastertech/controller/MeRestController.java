@@ -10,21 +10,20 @@ import utp.mastertech.mastertech.dto.PerfilDTO;
 import utp.mastertech.mastertech.dto.PerfilUpdateRequest;
 import utp.mastertech.mastertech.dto.VentaDTO;
 import utp.mastertech.mastertech.mapper.VentaMapper;
-import utp.mastertech.mastertech.model.Perfil;
 import utp.mastertech.mastertech.model.Usuario;
-import utp.mastertech.mastertech.service.PerfilService;
+import utp.mastertech.mastertech.service.UsuarioService;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/** Datos del cliente autenticado: perfil, contraseña e historial de compras. */
+/** Datos del cliente autenticado (tabla usuarios): perfil, contraseña e historial de compras. */
 @RestController
 @RequestMapping("/api/v1/me")
 public class MeRestController {
 
     @Autowired
-    private PerfilService perfilService;
+    private UsuarioService usuarioService;
 
     @Autowired
     private VentaMapper ventaMapper;
@@ -36,15 +35,15 @@ public class MeRestController {
 
     @PutMapping
     public PerfilDTO actualizarPerfil(@Valid @RequestBody PerfilUpdateRequest req, Authentication auth) {
-        perfilService.actualizarDatosPersonales(auth.getName(), req.getNombre().trim(),
-                req.getDireccion(), req.getNumeroTelefono(), req.getBiografia());
+        usuarioService.actualizarDatosPersonales(auth.getName(), req.getNombre().trim(),
+                req.getDireccion(), req.getNumeroTelefono());
         return armarPerfil(auth.getName());
     }
 
     @PutMapping("/password")
     public ResponseEntity<Map<String, String>> cambiarPassword(@Valid @RequestBody CambiarPasswordRequest req,
                                                                Authentication auth) {
-        String error = perfilService.cambiarPassword(auth.getName(),
+        String error = usuarioService.cambiarPassword(auth.getName(),
                 req.getPasswordActual(), req.getPasswordNuevo(), req.getPasswordConfirm());
         if (error != null) {
             return ResponseEntity.badRequest().body(Map.of("error", error));
@@ -54,15 +53,14 @@ public class MeRestController {
 
     @GetMapping("/pedidos")
     public List<VentaDTO> historial(Authentication auth) {
-        Usuario usuario = perfilService.obtenerUsuarioPorEmail(auth.getName());
-        return perfilService.obtenerHistorialCompras(usuario).stream()
+        Usuario usuario = usuarioService.obtenerPorEmail(auth.getName());
+        return usuarioService.obtenerHistorialCompras(usuario).stream()
                 .map(ventaMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     private PerfilDTO armarPerfil(String email) {
-        Usuario u = perfilService.obtenerUsuarioPorEmail(email);
-        Perfil perfil = perfilService.obtenerOCrearPerfil(u);
+        Usuario u = usuarioService.obtenerPorEmail(email);
         PerfilDTO dto = new PerfilDTO();
         dto.setId(u.getId());
         dto.setNombre(u.getNombre());
@@ -71,7 +69,6 @@ public class MeRestController {
         dto.setDni(u.getDni());
         dto.setDireccion(u.getDireccion());
         dto.setNumeroTelefono(u.getNumeroTelefono());
-        dto.setBiografia(perfil.getBiografia());
         dto.setFechaRegistro(u.getFechaRegistro());
         return dto;
     }

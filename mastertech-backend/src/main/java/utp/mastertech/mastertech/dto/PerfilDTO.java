@@ -13,6 +13,5 @@ public class PerfilDTO {
     private String dni;
     private String direccion;
     private String numeroTelefono;
-    private String biografia;
     private LocalDateTime fechaRegistro;
 }
