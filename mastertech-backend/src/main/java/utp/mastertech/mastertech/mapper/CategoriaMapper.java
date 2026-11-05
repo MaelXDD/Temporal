@@ -15,6 +15,7 @@ public class CategoriaMapper {
         dto.setId(categoria.getId());
         dto.setNombre(categoria.getNombre());
         dto.setDescripcion(categoria.getDescripcion());
+        dto.setImagenUrl(categoria.getImagenUrl());   // solo lectura: la URL la fija el servidor al subir la imagen
         return dto;
     }
 

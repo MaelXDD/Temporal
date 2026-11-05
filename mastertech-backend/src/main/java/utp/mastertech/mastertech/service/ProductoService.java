@@ -115,7 +115,47 @@ public class ProductoService {
         return productoRepository.findByCategoriaId(id).isEmpty();
     }
 
+    /**
+     * Sube (o reemplaza) la imagen de la categoría. Mismo orden que en productos:
+     * sube la nueva, guarda la URL y solo entonces borra la anterior del bucket
+     * (si el guardado falla, se borra la recién subida).
+     */
+    public void guardarCategoria(Categoria categoria, MultipartFile imagen) {
+        String urlAnterior = categoriaRepository.findById(categoria.getId())
+                .map(Categoria::getImagenUrl)
+                .orElse(null);
+        categoria.setImagenUrl(urlAnterior);
+
+        if (imagen == null || imagen.isEmpty()) {
+            return;
+        }
+        String urlNueva = storageService.subirImagenCategoria(imagen);
+        categoria.setImagenUrl(urlNueva);
+        try {
+            categoriaRepository.save(categoria);
+        } catch (RuntimeException e) {
+            storageService.eliminarPorUrl(urlNueva);
+            throw e;
+        }
+        if (urlAnterior != null) {
+            storageService.eliminarPorUrl(urlAnterior);
+        }
+    }
+
+    /** Quita la imagen de la categoría: primero limpia la columna y luego borra el archivo del bucket. */
+    public void quitarImagenCategoria(Categoria categoria) {
+        String url = categoria.getImagenUrl();
+        categoria.setImagenUrl(null);
+        categoriaRepository.save(categoria);
+        storageService.eliminarPorUrl(url);
+    }
+
+    /** Elimina la categoría y, una vez borrada la fila, su imagen del bucket. */
     public void eliminarCategoria(Long id) {
+        String url = categoriaRepository.findById(id)
+                .map(Categoria::getImagenUrl)
+                .orElse(null);
         categoriaRepository.deleteById(id);
+        storageService.eliminarPorUrl(url);
     }
 }

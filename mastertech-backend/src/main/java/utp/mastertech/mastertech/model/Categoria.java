@@ -22,6 +22,9 @@ public class Categoria {
     @Column(length = 255)
     private String descripcion;
 
+    @Column(name = "imagen_url", length = 1000)
+    private String imagenUrl;
+
     @JsonIgnore
     @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude

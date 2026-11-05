@@ -28,6 +28,7 @@ public class SupabaseStorageService {
 
     private static final long MAX_BYTES = 5L * 1024 * 1024; // 5 MB
     private static final String PREFIJO_PRODUCTO = "prod";
+    private static final String PREFIJO_CATEGORIA = "cat";
 
     private final HttpClient http = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
@@ -56,6 +57,15 @@ public class SupabaseStorageService {
      * @throws StorageException         si Supabase no responde o rechaza la subida
      */
     public String subirImagenProducto(MultipartFile archivo) {
+        return subirImagen(archivo, PREFIJO_PRODUCTO);
+    }
+
+    /** Igual que {@link #subirImagenProducto}, para categorías (archivo cat_{uuid}.{ext} en el mismo bucket). */
+    public String subirImagenCategoria(MultipartFile archivo) {
+        return subirImagen(archivo, PREFIJO_CATEGORIA);
+    }
+
+    private String subirImagen(MultipartFile archivo, String prefijo) {
         if (archivo == null || archivo.isEmpty()) {
             throw new IllegalArgumentException("Selecciona una imagen.");
         }
@@ -76,7 +86,7 @@ public class SupabaseStorageService {
             throw new IllegalArgumentException("Formato no permitido. Usa JPG, PNG o WEBP.");
         }
 
-        String nombreArchivo = PREFIJO_PRODUCTO + "_" + UUID.randomUUID() + "." + tipo.extension;
+        String nombreArchivo = prefijo + "_" + UUID.randomUUID() + "." + tipo.extension;
 
         HttpRequest request = HttpRequest.newBuilder(URI.create(urlObjeto(nombreArchivo)))
                 .timeout(Duration.ofSeconds(30))

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import utp.mastertech.mastertech.dto.CategoriaDTO;
 import utp.mastertech.mastertech.exception.ConflictException;
 import utp.mastertech.mastertech.exception.ResourceNotFoundException;
@@ -53,6 +54,24 @@ public class CategoriaRestController {
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada: " + id));
         categoriaMapper.updateEntityFromDTO(dto, categoria);
         productoService.guardarCategoria(categoria);
+        return categoriaMapper.toDTO(categoria);
+    }
+
+    /** Sube (o reemplaza) la imagen de la categoría en Supabase Storage. Solo ADMIN. */
+    @PostMapping(value = "/{id}/imagen", consumes = "multipart/form-data")
+    public CategoriaDTO subirImagen(@PathVariable Long id, @RequestParam("imagen") MultipartFile imagen) {
+        Categoria categoria = productoService.obtenerCategoria(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada: " + id));
+        productoService.guardarCategoria(categoria, imagen);
+        return categoriaMapper.toDTO(productoService.obtenerCategoria(id).orElse(categoria));
+    }
+
+    /** Quita la imagen de la categoría y la borra del bucket. Solo ADMIN. */
+    @DeleteMapping("/{id}/imagen")
+    public CategoriaDTO quitarImagen(@PathVariable Long id) {
+        Categoria categoria = productoService.obtenerCategoria(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada: " + id));
+        productoService.quitarImagenCategoria(categoria);
         return categoriaMapper.toDTO(categoria);
     }
 
